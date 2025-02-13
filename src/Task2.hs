@@ -12,7 +12,7 @@ import Prelude hiding (reverse, map, filter, sum, foldl, foldr, length, head, ta
 -- You can reuse already implemented functions from Task1
 -- by listing them in this import clause
 -- NOTE: only listed functions are imported, everything else remains hidden
-import Task1 (reverse, map, sum)
+import Task1 (reverse, map, sum, doubleEveryOther, toDigits)
 
 -----------------------------------
 --
@@ -25,7 +25,7 @@ import Task1 (reverse, map, sum)
 -- 1
 
 luhnModN :: Int -> (a -> Int) -> [a] -> Int
-luhnModN = error "TODO: define luhnModN"
+luhnModN n toInt xs = (n - (sum (map (\x -> if x >= n then x - (n - 1) else x) (doubleEveryOther (reverse (map toInt xs)))) `mod` n)) `mod` n
 
 -----------------------------------
 --
@@ -37,7 +37,7 @@ luhnModN = error "TODO: define luhnModN"
 -- 1
 
 luhnDec :: [Int] -> Int
-luhnDec = error "TODO: define luhnDec"
+luhnDec = luhnModN 10 id
 
 -----------------------------------
 --
@@ -49,7 +49,7 @@ luhnDec = error "TODO: define luhnDec"
 -- 15
 
 luhnHex :: [Char] -> Int
-luhnHex = error "TODO: define luhnHex"
+luhnHex = luhnModN 16 digitToInt
 
 -----------------------------------
 --
@@ -65,7 +65,11 @@ luhnHex = error "TODO: define luhnHex"
 -- [10,11,12,13,14,15]
 
 digitToInt :: Char -> Int
-digitToInt = error "TODO: define digitToInt"
+digitToInt c
+  | '0' <= c && c <= '9' = fromEnum c - fromEnum '0'
+  | 'a' <= c && c <= 'f' = fromEnum c - fromEnum 'a' + 10
+  | 'A' <= c && c <= 'F' = fromEnum c - fromEnum 'A' + 10
+  | otherwise            = error "Invalid hexadecimal character"
 
 -----------------------------------
 --
@@ -82,7 +86,7 @@ digitToInt = error "TODO: define digitToInt"
 -- False
 
 validateDec :: Integer -> Bool
-validateDec = error "TODO: define validateDec"
+validateDec n = luhnDec (toDigits (n `div` 10)) == fromIntegral (n `mod` 10)
 
 -----------------------------------
 --
@@ -99,4 +103,18 @@ validateDec = error "TODO: define validateDec"
 -- False
 
 validateHex :: [Char] -> Bool
-validateHex = error "TODO: define validateHex"
+validateHex s = luhnHex (init s) == digitToInt (last s)
+
+-----------------------------------
+
+-- init
+init :: [a] -> [a]
+init [] = error "empty list"
+init [_] = []
+init (x:xs) = x : init xs
+
+-- last
+last :: [a] -> a
+last [] = error "empty list"
+last [x] = x
+last (_:xs) = last xs
